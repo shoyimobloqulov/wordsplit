@@ -1,5 +1,5 @@
 <template>
-  <div class="container py-4">
+  <div class="container">
     <div class="card border-0">
       <div class="card-body">
         <h1 class="text-center card-title mb-4">Word fayl tahlilchisi</h1>
@@ -7,34 +7,32 @@
         <!-- File Upload Input -->
         <div class="mb-3">
           <label for="fileInput" class="form-label h5">Word faylini yuklang</label>
-          <input
-            type="file"
-            id="fileInput"
-            @change="handleFile"
-            class="form-control"
-            accept=".docx"
-          />
+          <input type="file" id="fileInput" @change="handleFile" class="form-control" accept=".docx" />
         </div>
 
         <!-- Sorting Buttons -->
-        <div v-if="wordFrequency.length" class="row">
+        <div v-if="wordFrequency.length" class="row mx-1">
           <button @click="sortBy('asc')" class="btn btn-outline-primary col mx-1">
-            Sort by Frequency (Ascending)
+            Soni bo'yicha saralash (o'sish bo'yicha)
           </button>
           <button @click="sortBy('desc')" class="btn btn-outline-secondary col">
-            Sort by Frequency (Descending)
+            Soni bo'yicha saralash (kamayish bo'yicha)
           </button>
           <button @click="sortBy('alphabet')" class="btn btn-outline-success col mx-1">
-            Sort Alphabetically
+            Alifbo tartibida tartiblash
           </button>
 
           <button @click="downloadCSV" class="btn btn-primary col">
-              Download Table as CSV
+            Jadvalni CSV sifatida yuklab oling
           </button>
 
           <button @click="downloadDocx" class="btn btn-primary col mx-1">
-            Download Table Word
+            Word jadvalini yuklab oling
           </button>
+        </div>
+
+        <div v-if="wordFrequency.length" class="card card-body my-2">
+          {{  word }}
         </div>
 
         <!-- Word Frequency Table -->
@@ -42,8 +40,8 @@
           <table class="table table-bordered table-striped text-center">
             <thead class="table-dark">
               <tr>
-                <th>Word</th>
-                <th>Frequency</th>
+                <th>So'z</th>
+                <th>Takrorlanishlar soni</th>
               </tr>
             </thead>
             <tbody>
@@ -54,156 +52,119 @@
             </tbody>
           </table>
         </div>
-      <!-- Pagination Controls -->
-      <div v-if="wordFrequency.length" class="d-flex justify-content-center gap-2 mt-3">
-        <button 
-          class="btn btn-outline-primary" 
-          :disabled="currentPage === 1" 
-          @click="changePage(currentPage - 1)">
-          Oldingi
-        </button>
-        <span class="align-self-center">
-          Sahifa: {{ currentPage }} - {{ totalPages }}
-        </span>
-        <button 
-          class="btn btn-outline-primary" 
-          :disabled="currentPage === totalPages" 
-          @click="changePage(currentPage + 1)">
-          Keyingisi
-        </button>
-      </div>
+        <!-- Pagination Controls -->
+        <div v-if="wordFrequency.length" class="d-flex justify-content-center gap-2 mt-3">
+          <button class="btn btn-outline-primary" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
+            Oldingi
+          </button>
+          <span class="align-self-center">
+            Sahifa: {{ currentPage }} / {{ totalPages }}
+          </span>
+          <button class="btn btn-outline-primary" :disabled="currentPage === totalPages"
+            @click="changePage(currentPage + 1)">
+            Keyingisi
+          </button>
+        </div>
       </div>
     </div>
 
-    
+
   </div>
 </template>
 
 <script>
-import mammoth from "mammoth";
-import { Document, Packer, Table, TableRow, TableCell, TextRun } from "docx";
-import { saveAs } from "file-saver";
-import Docxtemplater from "docxtemplater";
-import PizZip from "pizzip";
-export default {
-  data() {
-    return {
-      wordFrequency: [],
-      currentPage: 1, 
-      itemsPerPage: 10, 
-    };
-  },
-
-  computed: {
-    totalPages() {
-      return Math.ceil(this.wordFrequency.length / this.itemsPerPage);
+  import mammoth from "mammoth";
+  import {
+    saveAs
+  } from "file-saver";
+  export default {
+    data() {
+      return {
+        wordFrequency: [],
+        currentPage: 1,
+        itemsPerPage: 10,
+        word: ""
+      };
     },
 
-    paginatedData() {
-      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-      const endIndex = startIndex + this.itemsPerPage;
-      return this.wordFrequency.slice(startIndex, endIndex);
-    },
-  },
-  methods: {
-    async handleFile(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const arrayBuffer = e.target.result;
-          const result = await mammoth.extractRawText({ arrayBuffer });
-          this.processText(result.value);
-        };
-        reader.readAsArrayBuffer(file);
-      }
-    },
+    computed: {
+      totalPages() {
+        return Math.ceil(this.wordFrequency.length / this.itemsPerPage);
+      },
 
-    sortBy(order) {
-      if (order === "asc") {
-        this.wordFrequency.sort((a, b) => a.count - b.count);
-      } else if (order === "desc") {
-        this.wordFrequency.sort((a, b) => b.count - a.count);
-      } else if (order === "alphabet") {
-        this.wordFrequency.sort((a, b) => a.word.localeCompare(b.word));
-      }
+      paginatedData() {
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = startIndex + this.itemsPerPage;
+        return this.wordFrequency.slice(startIndex, endIndex);
+      },
     },
+    methods: {
+      async handleFile(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = async (e) => {
+            const arrayBuffer = e.target.result;
+            const result = await mammoth.extractRawText({
+              arrayBuffer
+            });
+            this.word = result.value
+            this.processText(result.value);
+          };
+          reader.readAsArrayBuffer(file);
+        }
+      },
 
-    processText(text) {
-      const words = text
-        .toLowerCase()
-        .replace(/[^a-zA-Z0-9\s]/g, "")
-        .split(/\s+/)
-        .filter(Boolean);
-      const frequencyMap = words.reduce((map, word) => {
-        map[word] = (map[word] || 0) + 1;
-        return map;
-      }, {});
-      this.wordFrequency = Object.entries(frequencyMap)
-        .map(([word, count]) => ({ word, count }))
-        .sort((a, b) => b.count - a.count);
-    },
+      sortBy(order) {
+        if (order === "asc") {
+          this.wordFrequency.sort((a, b) => a.count - b.count);
+        } else if (order === "desc") {
+          this.wordFrequency.sort((a, b) => b.count - a.count);
+        } else if (order === "alphabet") {
+          this.wordFrequency.sort((a, b) => a.word.localeCompare(b.word));
+        }
+      },
 
-    changePage(page) {
-      if (page < 1 || page > this.totalPages) return;
-      this.currentPage = page;
-    },
+      processText(text) {
+        const words = text
+          .toLowerCase()
+          .replace(/[^a-zA-Z0-9\s]/g, "")
+          .split(/\s+/)
+          .filter(Boolean);
+        const frequencyMap = words.reduce((map, word) => {
+          map[word] = (map[word] || 0) + 1;
+          return map;
+        }, {});
+        this.wordFrequency = Object.entries(frequencyMap)
+          .map(([word, count]) => ({
+            word,
+            count
+          }))
+          .sort((a, b) => b.count - a.count);
+      },
 
-    downloadCSV() {
-      const csvContent =
-        "data:text/csv;charset=utf-8," +
-        ["Word,Frequency"]
+      changePage(page) {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+      },
+
+      downloadCSV() {
+        const csvContent =
+          "data:text/csv;charset=utf-8," + ["Word,Frequency"]
           .concat(
             this.wordFrequency.map((item) => `${item.word},${item.count}`)
           )
           .join("\n");
-      const blob = new Blob([decodeURIComponent(encodeURI(csvContent))], {
-        type: "text/csv;charset=utf-8;",
-      });
-      saveAs(blob, "word-frequency.csv");
-    },
-    async downloadDocx() {
-      const doc = new Document({
-        sections: [
-          {
-            properties: {},
-            children: [
-              new Table({
-                rows: [
-                  new TableRow({
-                    children: [
-                      new TableCell({
-                        children: [new TextRun("Word")],
-                      }),
-                      new TableCell({
-                        children: [new TextRun("Frequency")],
-                      }),
-                    ],
-                  }),
-                  ...this.wordFrequency.map((item) =>
-                    new TableRow({
-                      children: [
-                        new TableCell({
-                          children: [new TextRun(item.word)],
-                        }),
-                        new TableCell({
-                          children: [new TextRun(item.count.toString())],
-                        }),
-                      ],
-                    })
-                  ),
-                ],
-              }),
-            ],
-          },
-        ],
-      });
+        const blob = new Blob([decodeURIComponent(encodeURI(csvContent))], {
+          type: "text/csv;charset=utf-8;",
+        });
+        saveAs(blob, "word-frequency.csv");
+      },
 
-      Packer.toBlob(doc).then((blob) => {
-        saveAs(blob, "word-frequency.docx");
-      });
+      
+      downloadDocx() {
+
+      }
     },
-  },
-};
+  };
 </script>
-
