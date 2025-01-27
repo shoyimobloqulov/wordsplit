@@ -163,16 +163,6 @@ export default {
       saveAs(blob, "word-frequency.csv");
     },
     async downloadDocx() {
-      if (this.wordFrequency.length === 0) {
-        console.error("No word frequency data available!");
-        alert("No word frequency data available!");
-        return;
-      }
-
-      // Ensure wordFrequency contains valid data
-      console.log("Word Frequency Data: ", this.wordFrequency);
-
-      // Create the document
       const doc = new Document({
         sections: [
           {
@@ -209,27 +199,10 @@ export default {
         ],
       });
 
-      try {
-        // Check if the document is being created correctly
-        const blob = await Packer.toBlob(doc);
-        console.log("DOCX file generated successfully!");
-
-        // Log the Blob content for debugging (optional)
-        const reader = new FileReader();
-        reader.onload = function (event) {
-          console.log("Blob Content: ", event.target.result);
-        };
-        reader.readAsText(blob);
-
-        // Save the DOCX file
+      Packer.toBlob(doc).then((blob) => {
         saveAs(blob, "word-frequency.docx");
-      } catch (error) {
-        // Handle any errors during document generation
-        console.error("Error generating DOCX:", error);
-        alert("An error occurred while generating the Word document. Please try again.");
-      }
-    }
-
+      });
+    },
   },
 };
 </script>
