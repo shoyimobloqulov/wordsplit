@@ -1,38 +1,46 @@
 <template>
   <div class="container">
-    <div class="card border-0">
+    <div class="card my-2">
       <div class="card-body">
-        <h1 class="text-center card-title mb-4">Word fayl tahlilchisi</h1>
+        <h1 class="card-title">So'z tahlilchisi</h1>
 
         <!-- File Upload Input -->
         <div class="mb-3">
-          <label for="fileInput" class="form-label h5">Word faylini yuklang</label>
+          <label for="fileInput" class="form-label">Word faylini yuklang</label>
           <input type="file" id="fileInput" @change="handleFile" class="form-control" accept=".docx" />
-        </div>
-
-        <!-- Sorting Buttons -->
-        <div v-if="wordFrequency.length" class="row mx-1">
-          <button @click="sortBy('asc')" class="btn btn-outline-primary col mx-1">
-            Soni bo'yicha saralash (o'sish bo'yicha)
-          </button>
-          <button @click="sortBy('desc')" class="btn btn-outline-secondary col">
-            Soni bo'yicha saralash (kamayish bo'yicha)
-          </button>
-          <button @click="sortBy('alphabet')" class="btn btn-outline-success col mx-1">
-            Alifbo tartibida tartiblash
-          </button>
-
-          <button @click="downloadCSV" class="btn btn-primary col">
-            Jadvalni CSV sifatida yuklab oling
-          </button>
-
-          <button @click="downloadDocx" class="btn btn-primary col mx-1">
-            Word jadvalini yuklab oling
-          </button>
         </div>
 
         <div v-if="wordFrequency.length" class="card card-body my-2">
           {{  word }}
+        </div>
+
+        <!-- Sorting Buttons -->
+        <div v-if="wordFrequency.length" class="row g-2">
+          <div class="col-12 col-md-6 col-lg-4">
+            <button @click="sortBy('asc')" class="btn btn-outline-primary w-100">
+              Soni bo'yicha saralash (o'sish bo'yicha)
+            </button>
+          </div>
+          <div class="col-12 col-md-6 col-lg-4">
+            <button @click="sortBy('desc')" class="btn btn-outline-secondary w-100">
+              Soni bo'yicha saralash (kamayish bo'yicha)
+            </button>
+          </div>
+          <div class="col-12 col-md-6 col-lg-4">
+            <button @click="sortBy('alphabet')" class="btn btn-outline-success w-100">
+              Alifbo tartibida tartiblash
+            </button>
+          </div>
+          <div class="col-12 col-md-6 col-lg-4">
+            <button @click="downloadCSV" class="btn btn-primary w-100">
+              Jadvalni CSV sifatida yuklab oling
+            </button>
+          </div>
+          <div class="col-12 col-md-6 col-lg-4">
+            <button @click="downloadDocx" class="btn btn-primary w-100">
+              Word jadvalini yuklab oling
+            </button>
+          </div>
         </div>
 
         <!-- Word Frequency Table -->
