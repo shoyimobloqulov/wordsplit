@@ -75,6 +75,15 @@
 <script>
   import mammoth from "mammoth";
   import {
+    Document,
+    Packer,
+    Paragraph,
+    Table,
+    TableRow,
+    TableCell,
+    WidthType
+  } from "docx";
+  import {
     saveAs
   } from "file-saver";
   export default {
@@ -161,9 +170,51 @@
         saveAs(blob, "word-frequency.csv");
       },
 
-      
-      downloadDocx() {
 
+      downloadDocx() {
+        const doc = new Document({
+          sections: [{
+            properties: {},
+            children: [
+              new Paragraph("So'z Taxlil jadvali"),
+              new Table({
+                width: {
+                  size: 100,
+                  type: WidthType.PERCENTAGE
+                },
+                rows: [
+                  new TableRow({
+                    children: [
+                      new TableCell({
+                        children: [new Paragraph("So'z")],
+                      }),
+                      new TableCell({
+                        children: [new Paragraph("Takrorlanishlar soni")],
+                      }),
+                    ],
+                  }),
+                  ...this.wordFrequency.map(
+                    (item) =>
+                    new TableRow({
+                      children: [
+                        new TableCell({
+                          children: [new Paragraph(item.word)],
+                        }),
+                        new TableCell({
+                          children: [new Paragraph(item.count.toString())],
+                        }),
+                      ],
+                    })
+                  ),
+                ],
+              }),
+            ],
+          }, ],
+        });
+
+        Packer.toBlob(doc).then((blob) => {
+          saveAs(blob, "word-frequency.docx");
+        });
       }
     },
   };
